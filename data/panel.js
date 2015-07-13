@@ -10,4 +10,8 @@ $(document).ready(function() {
 	$("#hessen_wms").on("click", function() {
 		$("#url").val("http://www.gds-srv.hessen.de/cgi-bin/lika-services/ogc-free-maps.ows");
 	});
+
+	$("#bplan_wms").on("click", function() {
+		$("#url").val("http://dienste.kcgim.de/ladadi/bplan/wms");
+	});
 });

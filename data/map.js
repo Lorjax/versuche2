@@ -1,42 +1,71 @@
+// jQuery
+$(document).ready(function() {
+	$("#toggleBaseMap").on("click", function() {
+		if(!map.hasLayer(openstreetmap)) {
+			map.addLayer(openstreetmap);
+			$("#toggleBaseMapIcon").toggleClass("glyphicon glyphicon-ok");
+		} else {
+			map.removeLayer(openstreetmap);
+			$("#toggleBaseMapIcon").toggleClass("glyphicon glyphicon-ok");
+		}
+	});
+
+	$("#navLayersDropdown").on("click", function() {
+		//var clicked = $(this)
+	});
+
+
+
+	
+});
+
+// wms und map als lokale Variablen definieren
 var wms = new Wms();
 
-self.port.on("openLeafletTab", function(data) {
-	wms.setUrl(self.options.url);
-	console.log(self.options.url);
-	initMap(data);
+var map = L.map('map',{
+	center: [49.866667, 8.65],
+	zoom: 13
 });
 
 
-function initMap(text) {
-	wms.initWms(text);
+var openstreetmap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'});
 
-	/*
-	Leaflet initialisieren
-	*/
-	var map = L.map('map',{
-		center: [49.866667, 8.65],
-		zoom: 13
-	});
+self.port.on("openLeafletTab", function(data) {
+	console.log("open");
+	//URL in wms schreiben
+	wms.setUrl(self.options.url);
+	//WMS initialisieren
+	wms.initWms(data);
+	//Layer laden
+	loadLayers();
+	//Scale einfügen
+	L.control.scale().addTo(map);
+	
 
-	L.tileLayer.wms(wms.url, {
+	$("#navServerName").text(wms.url);
+});
+
+
+function loadLayers() {
+	var wmsLayers = wms.getLayers();
+	var leafletLayers = [];
+
+
+	var layer1 = L.tileLayer.wms(wms.url, {
 		layers: "adv_dtk10",
 		attribution: wms.getTitle(),
 	}).addTo(map);
 
-	var openstreetmap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'});
+	
+
+	
 	var adv_dtk10 = L.tileLayer.wms(wms.url, {layers: "adv_dtk10", attribution: wms.getTitle()});
 
-	for(var [key, value] of wms.getLayers().entries()) {
-		var value = L.tileLayer.wms(wms.url, {layers: value, attribution: wms.getTitle()});
-		console.log(key + " = " + value);
+
+	for(var i = 0; i < wmsLayers.length; i++) {
+		$("#navLayersDropdown").append("<li><a href='#' id='layer_" + i + "'>" + wmsLayers[i].getTitle() + "</a></li>");
+		leafletLayers[i] = L.tileLayer.wms(wms.getUrl(), {layers: wmsLayers[i].getName(), attribution: wmsLayers[i].getName()});
 	}
 
 
-	var baseMaps = {
-		"OpenStreetMap": openstreetmap,
-		"Hessen WMS": adv_dtk10,
-		"DTK 50": adv_dtk50,
-	}
-
-	L.control.layers(baseMaps).addTo(map);
 }

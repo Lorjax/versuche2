@@ -3,7 +3,7 @@ function Wms() {
 	this.title = "";
 	this.abstract = "";
 	this.url = "";
-	this.layers = new Map();
+	this.layers = [];
 }
 
 
@@ -23,13 +23,27 @@ Wms.prototype.initWms = function(response) {
 	this.name = service[0].getElementsByTagName("Name")[0].childNodes[0].nodeValue;
 
 	//Layers als Map(key/value Paare) erstellen --> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
-	this.layers = new Map();
+	//this.layers = new Map();
 	//die einzelnen Layer in Map schreiben; layer_titel als Key, layer_name als value
 	for (i=0;i<layer.length;i++) {
+		var layerToAdd = new Layer();
 		var layer_name = layer[i].getElementsByTagName("Name")[0].childNodes[0].nodeValue;
-		var layer_titel = layer[i].getElementsByTagName("Title")[0].childNodes[0].nodeValue;
+		var layer_title = layer[i].getElementsByTagName("Title")[0].childNodes[0].nodeValue;
+		var layer_abstract = layer[i].getElementsByTagName("Abstract")[0].childNodes[0].nodeValue;
+		var layer_westBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("westBoundLongitude")[0].childNodes[0].nodeValue;
+		var layer_eastBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("eastBoundLongitude")[0].childNodes[0].nodeValue;
+		var layer_southBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("southBoundLatitude")[0].childNodes[0].nodeValue;
+		var layer_northBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("northBoundLatitude")[0].childNodes[0].nodeValue;
 
-		this.layers.set(layer_titel, layer_name);
+		layerToAdd.setName(layer_name);
+		layerToAdd.setTitle(layer_title);
+		layerToAdd.setAbstract(layer_abstract);
+		layerToAdd.setWestBound(layer_westBounds);
+		layerToAdd.setEastBound(layer_eastBounds);
+		layerToAdd.setSouthBound(layer_southBounds);
+		layerToAdd.setNorthBound(layer_northBounds);
+
+		this.layers.push(layerToAdd);
 
 		}
 
@@ -46,7 +60,7 @@ Wms.prototype.setUrl = function(url) {
 }
 
 Wms.prototype.getUrl = function() {
-	return url;
+	return this.url;
 }
 
 Wms.prototype.getTitle = function() {
@@ -56,3 +70,14 @@ Wms.prototype.getTitle = function() {
 Wms.prototype.getLayers = function() {
 	return this.layers;
 }
+
+
+// wms = new Wms();
+
+// self.port.on("openLeafletTab", function(data) {
+// 	console.log("[DEBUG-wms.js] erzeuge wms...");
+// 	wms.setUrl(self.options.url);
+// 	console.log(self.options.url);
+// 	wms.initWms(data);
+
+// });
