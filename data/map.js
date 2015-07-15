@@ -24,6 +24,7 @@ $(document).ready(function() {
 		var auswahl = $(this).val();
 		if(!map.hasLayer(leafletLayers[auswahl])) {
 			map.addLayer(leafletLayers[auswahl]);
+			panToLayerCenter(auswahl);
 			$("span", this).toggleClass("glyphicon glyphicon-ok");
 		} else {
 			map.removeLayer(leafletLayers[auswahl]);
@@ -76,8 +77,21 @@ function loadLayers() {
 
 	for(var i = 0; i < wmsLayers.length; i++) {
 		$("#navLayersDropdown").append("<li value="+i+"><a href='#'><span></span> " + wmsLayers[i].getTitle() + "</a></li>");
-		leafletLayers[i] = L.tileLayer.wms(wms.getUrl(), {layers: wmsLayers[i].getName(), format:'image/png', transparent: true, attribution: wmsLayers[i].getName()});
+		leafletLayers[i] = L.tileLayer.wms(wms.getUrl(), {
+			layers: wmsLayers[i].getName(),
+			format:'image/png',
+			transparent: true,
+			attribution: wmsLayers[i].getTitle(),
+			bounds: L.latLngBounds(L.latLng(wmsLayers[i].getSouthBound(),wmsLayers[i].getWestBound()), L.latLng(wmsLayers[i].getNorthBound(),wmsLayers[i].getEastBound())),
+		});
 	}
 
 
+}
+
+function panToLayerCenter(i) {
+	var layer = wms.getLayers()[i];
+	var layerBounds = L.latLngBounds(L.latLng(layer.getSouthBound(),layer.getWestBound()), L.latLng(layer.getNorthBound(),layer.getEastBound()));
+
+	map.panTo(layerBounds.getCenter());
 }

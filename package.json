@@ -1,9 +1,9 @@
 {
-  "name": "versuche2",
-  "title": "versuche2",
+  "name": "wmsviewer",
+  "title": "WMS-Viewer",
   "id": "jid1-rG2JKHDA7rbnfg",
-  "description": "a basic add-on",
-  "author": "",
+  "description": "WMS-Viewer",
+  "author": "Max G.",
   "license": "MPL 2.0",
   "version": "0.1"
 }
