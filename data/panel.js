@@ -1,5 +1,6 @@
 $(document).ready(function() {
 	$("#btnSubmit").on("click", function() {
+		$("#form").removeClass("has-error");
 		var url = $("#url").val();
 
 		self.port.emit("panelUrlEntered", url);
@@ -14,4 +15,12 @@ $(document).ready(function() {
 	$("#bplan_wms").on("click", function() {
 		$("#url").val("http://dienste.kcgim.de/ladadi/bplan/wms");
 	});
+
+	self.port.on("urlException", function(msg){
+		$("#form").addClass("has-error");
+		$("#url").tooltip('show');
 });
+
+});
+
+

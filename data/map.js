@@ -24,7 +24,7 @@ $(document).ready(function() {
 		var auswahl = $(this).val();
 		if(!map.hasLayer(leafletLayers[auswahl])) {
 			map.addLayer(leafletLayers[auswahl]);
-			panToLayerCenter(auswahl);
+			panToLayerBounds(auswahl);
 			$("span", this).toggleClass("glyphicon glyphicon-ok");
 		} else {
 			map.removeLayer(leafletLayers[auswahl]);
@@ -55,8 +55,9 @@ var cartodb = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y
 });
 
 var map = L.map('map',{
-	center: [49.866667, 8.65],
-	zoom: 13,
+	//center: [49.866667, 8.65], // Darmstadt
+	center: [50,10],
+	zoom: 5,
 	layers: openstreetmap,
 });
 
@@ -103,4 +104,11 @@ function panToLayerCenter(i) {
 	var layerBounds = L.latLngBounds(L.latLng(layer.getSouthBound(),layer.getWestBound()), L.latLng(layer.getNorthBound(),layer.getEastBound()));
 
 	map.panTo(layerBounds.getCenter());
+}
+
+function panToLayerBounds(i) {
+	var layer = wms.getLayers()[i];
+	var layerBounds = L.latLngBounds(L.latLng(layer.getSouthBound(),layer.getWestBound()), L.latLng(layer.getNorthBound(),layer.getEastBound()));
+
+	map.fitBounds(layerBounds);
 }
