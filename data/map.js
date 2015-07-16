@@ -38,24 +38,33 @@ $(document).ready(function() {
 	
 });
 
-// wms und map als lokale Variablen definieren
+/*
+ Variablen im lokalen Scope erstellen:
+ wms, leafletLayers, Grundkarten und die map
+*/
 var wms = new Wms();
 
 var leafletLayers = [];
 
-var map = L.map('map',{
-	center: [49.866667, 8.65],
-	zoom: 13
+var openstreetmap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',{
+	attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors | '
 });
 
-/*
- Grundkarten
-*/
-var openstreetmap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'});
-var cartodb = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{attribution:'Tiles by &copy; <a href="http://cartodb.com/attributions">CartoDB</a> / Data by &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'});
+var cartodb = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{
+	attribution:'Tiles by &copy; <a href="http://cartodb.com/attributions">CartoDB</a> / Data by &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors | '
+});
+
+var map = L.map('map',{
+	center: [49.866667, 8.65],
+	zoom: 13,
+	layers: openstreetmap,
+});
+
+
+
 
 self.port.on("openLeafletTab", function(data) {
-	console.log("open");
+	console.log("[DEBUG-map.js] open Tab");
 	//URL in wms schreiben
 	wms.setUrl(self.options.url);
 	//WMS initialisieren
