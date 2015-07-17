@@ -70,14 +70,3 @@ Wms.prototype.getTitle = function() {
 Wms.prototype.getLayers = function() {
 	return this.layers;
 }
-
-
-// wms = new Wms();
-
-// self.port.on("openLeafletTab", function(data) {
-// 	console.log("[DEBUG-wms.js] erzeuge wms...");
-// 	wms.setUrl(self.options.url);
-// 	console.log(self.options.url);
-// 	wms.initWms(data);
-
-// });

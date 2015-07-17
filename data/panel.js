@@ -18,7 +18,7 @@ $(document).ready(function() {
 
 	self.port.on("urlException", function(msg){
 		$("#form").addClass("has-error");
-		$("#url").tooltip('show');
+
 });
 
 });
