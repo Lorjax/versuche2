@@ -1,7 +1,7 @@
 function Layer() {
 	this._name = "";
 	this._title = "";
-	this._abstract = "";
+	this._queryable = 0;
 	this._westBound = 0;
 	this._eastBound = 0;
 	this._southBound = 0;
@@ -24,12 +24,12 @@ Layer.prototype.getTitle = function() {
 	return this._title;
 }
 
-Layer.prototype.setAbstract = function(abstract) {
-	this._abstract = abstract;
+Layer.prototype.setQueryable = function(queryable) {
+	this._queryable = queryable;
 }
 
-Layer.prototype.getAbstract = function() {
-	return this._abstract;
+Layer.prototype.getQueryable = function() {
+	return this._queryable;
 }
 
 Layer.prototype.setWestBound = function(westBound) {

@@ -29,7 +29,7 @@ Wms.prototype.initWms = function(response) {
 		var layerToAdd = new Layer();
 		var layer_name = layer[i].getElementsByTagName("Name")[0].childNodes[0].nodeValue;
 		var layer_title = layer[i].getElementsByTagName("Title")[0].childNodes[0].nodeValue;
-		//var layer_abstract = layer[i].getElementsByTagName("Abstract")[0].childNodes[0].nodeValue;
+		var layer_queryable = layer[i].getAttribute("queryable");
 		var layer_westBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("westBoundLongitude")[0].childNodes[0].nodeValue;
 		var layer_eastBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("eastBoundLongitude")[0].childNodes[0].nodeValue;
 		var layer_southBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("southBoundLatitude")[0].childNodes[0].nodeValue;
@@ -37,7 +37,7 @@ Wms.prototype.initWms = function(response) {
 
 		layerToAdd.setName(layer_name);
 		layerToAdd.setTitle(layer_title);
-		//layerToAdd.setAbstract(layer_abstract);
+		layerToAdd.setQueryable(layer_queryable);
 		layerToAdd.setWestBound(layer_westBounds);
 		layerToAdd.setEastBound(layer_eastBounds);
 		layerToAdd.setSouthBound(layer_southBounds);

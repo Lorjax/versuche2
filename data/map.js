@@ -82,8 +82,6 @@ self.port.on("openLeafletTab", function(data) {
 
 function loadLayers() {
 	var wmsLayers = wms.getLayers();
-	//var leafletLayers = [];
-
 
 	for(var i = 0; i < wmsLayers.length; i++) {
 		$("#navLayersDropdown").append("<li value="+i+"><a href='#'><span></span> " + wmsLayers[i].getTitle() + "</a></li>");
@@ -111,4 +109,39 @@ function panToLayerBounds(i) {
 	var layerBounds = L.latLngBounds(L.latLng(layer.getSouthBound(),layer.getWestBound()), L.latLng(layer.getNorthBound(),layer.getEastBound()));
 
 	map.fitBounds(layerBounds);
+}
+
+/*
+Methoden und Listener für GetFeatureInfo
+*/
+map.on('click', function(e) {
+	console.log(e.latlng);
+	var text = "";
+	var i=0;
+	for(i;i<wms.getLayers().length;i++) {
+		text += wms.getLayers()[i].getName() + " queryable=" + wms.getLayers()[i].getQueryable() + "<br>";
+	}
+	var popup = L.popup().setLatLng(e.latlng).setContent(text).openOn(map);
+	// for(i; i<leafletLayers.length;i++) {
+	// 	if(map.hasLayer(leafletLayers[i])) {
+	// 		console.log(wms.getLayers()[i].getName());
+	// 	}
+	// }
+	// for(prop in layer1.wmsParams) {
+	// 	text += prop + ": " + layer1.wmsParams[prop] + "<br>";
+	// }
+	// text += "<br>================<br>";
+	// text += "latlng: " + e.latlng + "<br>Pixel: " + e.layerPoint;
+	// var popup = L.popup().setLatLng(e.latlng).setContent(text).openOn(map);
+});
+
+function paramsToAdd(e) {
+	return {
+		"request": "getFeatureInfo",
+		"info_format": "text/plain",
+		"query_layers": layer1.wmsParams.layers,
+		"i": e.layerPoint.x,
+		"j": e.layerPoint.y,
+		"bbox": map.getBounds().toBBoxString(),
+	}
 }
