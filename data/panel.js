@@ -20,8 +20,9 @@ $(document).ready(function() {
 		$("#url").val("http://demo.boundlessgeo.com/geoserver/wms?SERVICE=WMS&VERSION=1.3.0&request=getcapabilities");
 	})
 
-	self.port.on("urlException", function(msg){
+	self.port.on("fehler", function(msg){
 		$("#form").addClass("has-error");
+		$("#url").tooltip({'trigger':'focus hover', 'title': msg, 'placement':'bottom'});
 
 	});
 
