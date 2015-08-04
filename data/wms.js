@@ -19,7 +19,7 @@ Wms.prototype.initWms = function(response) {
 
 	//titel, abstract und name setzen
 	this.title = service[0].getElementsByTagName("Title")[0].childNodes[0].nodeValue;
-	this.abstract = service[0].getElementsByTagName("Abstract")[0].childNodes[0].nodeValue;
+	//this.abstract = service[0].getElementsByTagName("Abstract")[0].childNodes[0].nodeValue;
 	this.name = service[0].getElementsByTagName("Name")[0].childNodes[0].nodeValue;
 
 	//Layers als Map(key/value Paare) erstellen --> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map

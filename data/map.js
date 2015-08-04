@@ -90,7 +90,7 @@ function loadLayers() {
 			format:'image/png',
 			transparent: true,
 			attribution: wmsLayers[i].getTitle(),
-			bounds: L.latLngBounds(L.latLng(wmsLayers[i].getSouthBound(),wmsLayers[i].getWestBound()), L.latLng(wmsLayers[i].getNorthBound(),wmsLayers[i].getEastBound())),
+			//bounds: L.latLngBounds(L.latLng(wmsLayers[i].getSouthBound(),wmsLayers[i].getWestBound()), L.latLng(wmsLayers[i].getNorthBound(),wmsLayers[i].getEastBound())),
 		});
 	}
 
@@ -115,33 +115,61 @@ function panToLayerBounds(i) {
 Methoden und Listener für GetFeatureInfo
 */
 map.on('click', function(e) {
-	console.log(e.latlng);
+	//Popup erstellen und Position setzen
+	var popup = L.popup({autoPan: false, maxHeight: 200}).setLatLng(e.latlng);
+	// leeren Text erstellen
 	var text = "";
-	var i=0;
-	for(i;i<wms.getLayers().length;i++) {
-		text += wms.getLayers()[i].getName() + " queryable=" + wms.getLayers()[i].getQueryable() + "<br>";
-	}
-	var popup = L.popup().setLatLng(e.latlng).setContent(text).openOn(map);
-	// for(i; i<leafletLayers.length;i++) {
-	// 	if(map.hasLayer(leafletLayers[i])) {
-	// 		console.log(wms.getLayers()[i].getName());
-	// 	}
-	// }
-	// for(prop in layer1.wmsParams) {
-	// 	text += prop + ": " + layer1.wmsParams[prop] + "<br>";
-	// }
-	// text += "<br>================<br>";
-	// text += "latlng: " + e.latlng + "<br>Pixel: " + e.layerPoint;
-	// var popup = L.popup().setLatLng(e.latlng).setContent(text).openOn(map);
+	//Zusätzliche GetFeatureInfo-Parameter erzeugen
+	var params = paramsToAdd(e);
+	//Aus WMS-Parametern und GetFeatureInfo-Parametern eins machen
+	console.log("===============================");
+	console.log(leafletLayers[0].wmsParams);
+	console.log(params);
+	text = L.Util.getParamString(L.Util.extend({}, leafletLayers[0].wmsParams, params));
+	//URL des WMS an alle Parameter anhängen und somit URL erzeugen
+	var url = wms.getUrl() + text;
+	//Message an main.js mit anzufragender URL
+	self.port.emit("getFeatureInfo", url);
+	//Listener für Antwort auf GetFeatureInfo
+	self.port.on("getFeatureInfo_fertig", function(data) {
+		//onsole.log("[DEBUG-map.js] erhalte antwort: " + data);
+		//Popup-Content setzen aus Antwort und auf Karte anzeigen
+		popup.setContent(data).openOn(map);
+	});
 });
 
 function paramsToAdd(e) {
+	var layers = getDisplayedMaps();
+	var query_layers = getDisplayedMaps();
+	var i=0;
+	// for(i;i<wms.getLayers().length;i++) {
+	// 	if(wms.getLayers()[i].getQueryable() == 1) {
+	// 		query_layers.push(wms.getLayers()[i].getName());
+	// 	}
+	// }
 	return {
+		"version": "1.3.0",
 		"request": "getFeatureInfo",
 		"info_format": "text/plain",
-		"query_layers": layer1.wmsParams.layers,
+		"query_layers": query_layers,
+		"layers": layers,
+		"height": map.getSize().y,
+		"width": map.getSize().x,
 		"i": e.layerPoint.x,
 		"j": e.layerPoint.y,
 		"bbox": map.getBounds().toBBoxString(),
+		"crs": "EPSG:3857"
 	}
+}
+
+function getDisplayedMaps() {
+	var i = 0;
+	var result = [];
+	for(i; i<leafletLayers.length;i++) {
+		if(map.hasLayer(leafletLayers[i])) {
+			result.push(wms.getLayers()[i].getName());
+		}
+	}
+	console.log("[DEBUG:getDisplayedMaps] " + result);
+	return result;
 }
