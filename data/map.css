@@ -10,3 +10,14 @@ body {
 	padding-right: 0px;
 	padding-bottom: 0px;
 }
+
+#legende {
+	height: 300px;
+	width: 300px;
+	padding: 5px;
+	position: fixed;
+	bottom: 0;
+	left:0;
+	background-color: white;
+
+}

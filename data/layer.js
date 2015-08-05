@@ -6,6 +6,7 @@ function Layer() {
 	this._eastBound = 0;
 	this._southBound = 0;
 	this._northBound = 0;
+	this._legend = "";
 }
 
 Layer.prototype.setName = function(name) {
@@ -62,4 +63,12 @@ Layer.prototype.setNorthBound = function(northBound) {
 
 Layer.prototype.getNorthBound = function() {
 	return this._northBound;
+}
+
+Layer.prototype.getLegend = function() {
+	return this._legend;
+}
+
+Layer.prototype.setLegend = function(legend) {
+	this._legend = legend;
 }

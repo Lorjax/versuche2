@@ -26,6 +26,7 @@ $(document).ready(function() {
 			map.addLayer(leafletLayers[auswahl]);
 			panToLayerBounds(auswahl);
 			$("span", this).toggleClass("glyphicon glyphicon-ok");
+			$("#legende").append('<img src="' + wms.getLayers()[auswahl].getLegend() + '" /><br />');
 		} else {
 			map.removeLayer(leafletLayers[auswahl]);
 			$("span", this).toggleClass("glyphicon glyphicon-ok");

@@ -30,6 +30,19 @@ Wms.prototype.initWms = function(response) {
 		var layer_name = layer[i].getElementsByTagName("Name")[0].childNodes[0].nodeValue;
 		var layer_title = layer[i].getElementsByTagName("Title")[0].childNodes[0].nodeValue;
 		var layer_queryable = layer[i].getAttribute("queryable");
+		//var legend = layer[i].getElementsByTagName("Style")[0].getElementsByTagName("LegendURL")[0].getElementsByTagName("OnlineResource")[0].getAttribute("xlink:href");
+		var layer_legend = "";
+		if(layer[i].getElementsByTagName("Style")[0] != null) {
+			var style = layer[i].getElementsByTagName("Style")[0];
+			if(style.getElementsByTagName("LegendURL")[0] != null) {
+				var legendUrl = style.getElementsByTagName("LegendURL")[0];
+				if(legendUrl.getElementsByTagName("OnlineResource")[0].getAttribute("xlink:href") != null) {
+					var legend = legendUrl.getElementsByTagName("OnlineResource")[0].getAttribute("xlink:href");
+					layer_legend = legend;
+				}
+			}
+		}
+		//var layer_legend = layer[i].getElementsByTagName("Style")[0].getElementsByTagName("LegendURL")[0].getElementsByTagName("OnlineResource")[0].getAttribute("xlink:href");
 		var layer_westBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("westBoundLongitude")[0].childNodes[0].nodeValue;
 		var layer_eastBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("eastBoundLongitude")[0].childNodes[0].nodeValue;
 		var layer_southBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("southBoundLatitude")[0].childNodes[0].nodeValue;
@@ -38,6 +51,7 @@ Wms.prototype.initWms = function(response) {
 		layerToAdd.setName(layer_name);
 		layerToAdd.setTitle(layer_title);
 		layerToAdd.setQueryable(layer_queryable);
+		layerToAdd.setLegend(layer_legend);
 		layerToAdd.setWestBound(layer_westBounds);
 		layerToAdd.setEastBound(layer_eastBounds);
 		layerToAdd.setSouthBound(layer_southBounds);
