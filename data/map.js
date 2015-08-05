@@ -26,10 +26,14 @@ $(document).ready(function() {
 			map.addLayer(leafletLayers[auswahl]);
 			panToLayerBounds(auswahl);
 			$("span", this).toggleClass("glyphicon glyphicon-ok");
-			$("#legende").append('<img src="' + wms.getLayers()[auswahl].getLegend() + '" /><br />');
+			var legende = wms.getLayers()[auswahl].getLegend();
+			if(legende.length > 0) {
+				$("#legende").append('<li value=' + auswahl + '><img src="' + legende + '" /></li>');
+			}			
 		} else {
 			map.removeLayer(leafletLayers[auswahl]);
 			$("span", this).toggleClass("glyphicon glyphicon-ok");
+			$("#legende li[value=" + auswahl + "]").remove();
 		}
 		
 	});
@@ -115,7 +119,7 @@ function panToLayerBounds(i) {
 /*
 Methoden und Listener für GetFeatureInfo
 */
-map.on('click', function(e) {
+map.on('contextmenu', function(e) {
 	//Popup erstellen und Position setzen
 	var popup = L.popup({autoPan: false, maxHeight: 200}).setLatLng(e.latlng);
 	// leeren Text erstellen
@@ -137,6 +141,10 @@ map.on('click', function(e) {
 		//Popup-Content setzen aus Antwort und auf Karte anzeigen
 		popup.setContent(data).openOn(map);
 	});
+});
+
+map.on("layeradd", function(e) {
+	
 });
 
 function paramsToAdd(e) {

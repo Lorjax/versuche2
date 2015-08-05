@@ -14,7 +14,7 @@
         <div class="navbar-header">
           <a class="navbar-brand" href="#">WMS-Viewer</a>
         </div>
-        <p class="navbar-text">Connected To: <span class="label label-info" id="navServerName">Hessen_WMS</span></p>
+        <p class="navbar-text">Verbunden mit: <span class="label label-info" id="navServerName"></span></p>
         <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Layer <span class="caret"></span></a>
@@ -26,8 +26,8 @@
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Grundkarten einfügen<span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li><a href="#" id="toggleBaseMap_osm"><span id="toggleBaseMapIcon_osm"></span>OpenStreetMap</a></li>
-            <li><a href="#" id="toggleBaseMap_cartodb"><span id="toggleBaseMapIcon_cartodb"></span>CartoDB</a></li>
+            <li><a href="#" id="toggleBaseMap_osm"><span id="toggleBaseMapIcon_osm" class="glyphicon glyphicon-ok"></span> OpenStreetMap</a></li>
+            <li><a href="#" id="toggleBaseMap_cartodb"><span id="toggleBaseMapIcon_cartodb"></span> CartoDB</a></li>
             <li role="separator" class="divider"></li>
           </ul>
         </li>
@@ -35,8 +35,9 @@
       </div>
     </nav>
     <div id="map"></div>
-    <div id="legende">
-      <h3>Legende:</h3>
+    <div id="divLegende">
+      <p>Legende:</p>
+      <ul id="legende"></ul>
     </div>
 
 
