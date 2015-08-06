@@ -1,13 +1,11 @@
 function Wms() {
 	this.name = "";
 	this.title = "";
-	this.abstract = "";
 	this.url = "";
 	this.layers = [];
 }
 
 
-//Konstruktor für Wms-Objekt
 Wms.prototype.initWms = function(response) {
 	//response in xml parsen
 	var parser = new DOMParser();
@@ -17,20 +15,16 @@ Wms.prototype.initWms = function(response) {
 	var service = xmlDoc.getElementsByTagName("Service");
 	var layer = xmlDoc.getElementsByTagName("Layer");
 
-	//titel, abstract und name setzen
+	//titel und name setzen
 	this.title = service[0].getElementsByTagName("Title")[0].childNodes[0].nodeValue;
-	//this.abstract = service[0].getElementsByTagName("Abstract")[0].childNodes[0].nodeValue;
 	this.name = service[0].getElementsByTagName("Name")[0].childNodes[0].nodeValue;
 
-	//Layers als Map(key/value Paare) erstellen --> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
-	//this.layers = new Map();
-	//die einzelnen Layer in Map schreiben; layer_titel als Key, layer_name als value
+
 	for (i=0;i<layer.length;i++) {
 		var layerToAdd = new Layer();
 		var layer_name = layer[i].getElementsByTagName("Name")[0].childNodes[0].nodeValue;
 		var layer_title = layer[i].getElementsByTagName("Title")[0].childNodes[0].nodeValue;
 		var layer_queryable = layer[i].getAttribute("queryable");
-		//var legend = layer[i].getElementsByTagName("Style")[0].getElementsByTagName("LegendURL")[0].getElementsByTagName("OnlineResource")[0].getAttribute("xlink:href");
 		var layer_legend = "";
 		if(layer[i].getElementsByTagName("Style")[0] != null) {
 			var style = layer[i].getElementsByTagName("Style")[0];
@@ -42,7 +36,6 @@ Wms.prototype.initWms = function(response) {
 				}
 			}
 		}
-		//var layer_legend = layer[i].getElementsByTagName("Style")[0].getElementsByTagName("LegendURL")[0].getElementsByTagName("OnlineResource")[0].getAttribute("xlink:href");
 		var layer_westBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("westBoundLongitude")[0].childNodes[0].nodeValue;
 		var layer_eastBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("eastBoundLongitude")[0].childNodes[0].nodeValue;
 		var layer_southBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("southBoundLatitude")[0].childNodes[0].nodeValue;
@@ -60,9 +53,6 @@ Wms.prototype.initWms = function(response) {
 		this.layers.push(layerToAdd);
 
 		}
-
-
-	//console.log("WMS aus response erstellt!");
 }
 
 Wms.prototype.getName = function() {
