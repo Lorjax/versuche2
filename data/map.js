@@ -60,10 +60,11 @@ var cartodb = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y
 });
 
 var map = L.map('map',{
-	//center: [49.866667, 8.65], // Darmstadt
 	center: [50,10],
 	zoom: 5,
+	crs: L.CRS.EPSG3857,
 	layers: openstreetmap,
+	
 });
 
 
@@ -93,9 +94,10 @@ function loadLayers() {
 		leafletLayers[i] = L.tileLayer.wms(wms.getUrl(), {
 			layers: wmsLayers[i].getName(),
 			format:'image/png',
+			version: '1.3.0',
 			transparent: true,
 			attribution: wmsLayers[i].getTitle(),
-			//bounds: L.latLngBounds(L.latLng(wmsLayers[i].getSouthBound(),wmsLayers[i].getWestBound()), L.latLng(wmsLayers[i].getNorthBound(),wmsLayers[i].getEastBound())),
+			crs: L.Util.EPSG3857
 		});
 	}
 
@@ -121,18 +123,42 @@ Methoden und Listener für GetFeatureInfo
 */
 map.on('contextmenu', function(e) {
 	//Popup erstellen und Position setzen
-	var popup = L.popup({autoPan: false, maxHeight: 200}).setLatLng(e.latlng);
+	console.log(e.latlng.toString());
+	console.log(e.latlng.lat);
+	console.log(e.latlng.lng);
+	var popup = L.popup({autoPan: false, maxHeight: 200, maxWidth:500}).setLatLng(e.latlng);
 	// leeren Text erstellen
 	var text = "";
 	//Zusätzliche GetFeatureInfo-Parameter erzeugen
-	var params = paramsToAdd(e);
+	var paramss = paramsToAdd(e);
 	//Aus WMS-Parametern und GetFeatureInfo-Parametern eins machen
-	console.log("===============================");
-	console.log(leafletLayers[0].wmsParams);
-	console.log(params);
-	text = L.Util.getParamString(L.Util.extend({}, leafletLayers[0].wmsParams, params));
+	text = L.Util.getParamString(paramss);
 	//URL des WMS an alle Parameter anhängen und somit URL erzeugen
+	/*
+	text = "Größe Kartenrahmen: <br>";
+	text += "Höhe y=" + map.getSize().y + "<br>";
+	text += "Breite x=" + map.getSize().x + "<br><br>";
+	text += "Aktuelle BBox: <br>";
+	text += "unten links: <br>";
+	text += "Längengrad: " + map.getBounds().getWest() + "<br>";
+	text += "Breitengrad: " + map.getBounds().getSouth() + "<br>";
+	text += "oben rechts: <br>";
+	text += "Längengrad: " + map.getBounds().getEast() + "<br>";
+	text += "Breitengrad: " + map.getBounds().getNorth() + "<br>";
+	text += "---------------<br>";
+	text += "BBox-Leaflet: <br>";
+	text += map.getBounds().toBBoxString() + "<br>";
+	text += "======eigene BBox========<br>";
+	var params = paramsToAdd(e);
+	for(prop in params) {
+		text += prop + " = " + params[prop] + "<br>";
+	}
+	popup.setContent(text).openOn(map);
+	*/
+	console.log("[DEBUG:wms-url] " + wms.getUrl());
+	console.log("[DEBUG:wms-url] " + paramss);
 	var url = wms.getUrl() + text;
+
 	//Message an main.js mit anzufragender URL
 	self.port.emit("getFeatureInfo", url);
 	//Listener für Antwort auf GetFeatureInfo
@@ -143,31 +169,34 @@ map.on('contextmenu', function(e) {
 	});
 });
 
-map.on("layeradd", function(e) {
-	
-});
 
 function paramsToAdd(e) {
 	var layers = getDisplayedMaps();
-	var query_layers = getDisplayedMaps();
+	var query_layers = getQueryableMaps();
 	var i=0;
-	// for(i;i<wms.getLayers().length;i++) {
-	// 	if(wms.getLayers()[i].getQueryable() == 1) {
-	// 		query_layers.push(wms.getLayers()[i].getName());
-	// 	}
-	// }
+
+	var bbox = "";
+	var mapBounds = map.getBounds();
+	bbox += mapBounds.getSouth() + ",";
+	bbox += mapBounds.getWest() + ",";
+	bbox += mapBounds.getNorth() + ",";
+	bbox += mapBounds.getEast();
 	return {
+		"service":"wms",
 		"version": "1.3.0",
 		"request": "getFeatureInfo",
 		"info_format": "text/plain",
+		"styles": "",
 		"query_layers": query_layers,
 		"layers": layers,
-		"height": map.getSize().y,
 		"width": map.getSize().x,
-		"i": e.layerPoint.x,
-		"j": e.layerPoint.y,
-		"bbox": map.getBounds().toBBoxString(),
-		"crs": "EPSG:3857"
+		"height": map.getSize().y,
+		"i": e.containerPoint.x,
+		"j": e.containerPoint.y,
+		"crs": "EPSG:4326",
+		"bbox": bbox,
+		//"crs": "EPSG:3857"
+		
 	}
 }
 
@@ -176,6 +205,18 @@ function getDisplayedMaps() {
 	var result = [];
 	for(i; i<leafletLayers.length;i++) {
 		if(map.hasLayer(leafletLayers[i])) {
+			result.push(wms.getLayers()[i].getName());
+		}
+	}
+	console.log("[DEBUG:getDisplayedMaps] " + result);
+	return result;
+}
+
+function getQueryableMaps() {
+	var i = 0;
+	var result = [];
+	for(i; i<leafletLayers.length;i++) {
+		if(map.hasLayer(leafletLayers[i]) && wms.getLayers()[i].getQueryable() == 1) {
 			result.push(wms.getLayers()[i].getName());
 		}
 	}
