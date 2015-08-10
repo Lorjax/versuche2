@@ -7,6 +7,7 @@ function Wms() {
 
 
 Wms.prototype.initWms = function(response) {
+	try {
 	//response in xml parsen
 	var parser = new DOMParser();
 	var xmlDoc = parser.parseFromString(response, "text/xml");
@@ -41,6 +42,7 @@ Wms.prototype.initWms = function(response) {
 		var layer_southBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("southBoundLatitude")[0].childNodes[0].nodeValue;
 		var layer_northBounds = layer[i].getElementsByTagName("EX_GeographicBoundingBox")[0].getElementsByTagName("northBoundLatitude")[0].childNodes[0].nodeValue;
 
+
 		layerToAdd.setName(layer_name);
 		layerToAdd.setTitle(layer_title);
 		layerToAdd.setQueryable(layer_queryable);
@@ -52,6 +54,10 @@ Wms.prototype.initWms = function(response) {
 
 		this.layers.push(layerToAdd);
 
+		}
+
+		} catch(e) {
+			console.log("Fehler beim parsen des XML");
 		}
 }
 

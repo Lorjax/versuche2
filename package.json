@@ -2,8 +2,26 @@
   "name": "wmsviewer",
   "title": "WMS-Viewer",
   "id": "jid1-rG2JKHDA7rbnfg",
-  "description": "WMS-Viewer",
+  "description": "Erlaubt das Anfragen an Anzeigen von OGC-konformen WMS-Diensten.",
   "author": "Max G.",
   "license": "MPL 2.0",
-  "version": "0.1"
+  "version": "0.2",
+  "icon":"data/images/location-pin-64.png",
+  "preferences": [{
+  	"name":"crs",
+  	"title":"Bezugssystem",
+  	"description":"Legt das Bezugssystem des Kartenrahmens fest.",
+  	"type": "menulist",
+  	"value":"EPSG:3857",
+  	"options": [
+  		{
+  		"value": "L.CRS.EPSG3857",
+  		"label": "EPSG 3857"
+  		},
+  		{
+  		"value": "L.CRS:EPSG4326",
+  		"label": "EPSG 4326"
+  		}
+  		]
+  	}]
 }

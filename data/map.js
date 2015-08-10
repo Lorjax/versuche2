@@ -88,16 +88,18 @@ self.port.on("openLeafletTab", function(data) {
 
 function loadLayers() {
 	var wmsLayers = wms.getLayers();
-
+	var crs = map.options.crs;
 	for(var i = 0; i < wmsLayers.length; i++) {
-		$("#navLayersDropdown").append("<li value="+i+"><a href='#'><span></span> " + wmsLayers[i].getTitle() + "</a></li>");
+		if(wmsLayers[i].getName() != "") {
+			$("#navLayersDropdown").append("<li value="+i+"><a href='#'><span></span> " + wmsLayers[i].getTitle() + "</a></li>");
+		}
 		leafletLayers[i] = L.tileLayer.wms(wms.getUrl(), {
 			layers: wmsLayers[i].getName(),
 			format:'image/png',
 			version: '1.3.0',
 			transparent: true,
 			attribution: wmsLayers[i].getTitle(),
-			crs: L.Util.EPSG3857
+			crs: crs
 		});
 	}
 
@@ -130,9 +132,10 @@ map.on('contextmenu', function(e) {
 	// leeren Text erstellen
 	var text = "";
 	//Zusätzliche GetFeatureInfo-Parameter erzeugen
-	var paramss = paramsToAdd(e);
+	var params = paramsToAdd(e);
+	var crsBbox = getBboxParams(map);
 	//Aus WMS-Parametern und GetFeatureInfo-Parametern eins machen
-	text = L.Util.getParamString(paramss);
+	text = L.Util.getParamString(L.Util.extend({}, params, crsBbox));
 	//URL des WMS an alle Parameter anhängen und somit URL erzeugen
 	/*
 	text = "Größe Kartenrahmen: <br>";
@@ -155,10 +158,10 @@ map.on('contextmenu', function(e) {
 	}
 	popup.setContent(text).openOn(map);
 	*/
-	console.log("[DEBUG:wms-url] " + wms.getUrl());
-	console.log("[DEBUG:wms-url] " + paramss);
+	
+	console.log("[DEBUG:wms-url] " + text);
 	var url = wms.getUrl() + text;
-
+	console.log("[DEBUG:wms-url] " + url);
 	//Message an main.js mit anzufragender URL
 	self.port.emit("getFeatureInfo", url);
 	//Listener für Antwort auf GetFeatureInfo
@@ -174,13 +177,8 @@ function paramsToAdd(e) {
 	var layers = getDisplayedMaps();
 	var query_layers = getQueryableMaps();
 	var i=0;
-
-	var bbox = "";
-	var mapBounds = map.getBounds();
-	bbox += mapBounds.getSouth() + ",";
-	bbox += mapBounds.getWest() + ",";
-	bbox += mapBounds.getNorth() + ",";
-	bbox += mapBounds.getEast();
+	//console.log("[DEBUG]: eigene BBox " + bbox);
+	//console.log("[DEBUG]: leaflet Bbox:" + mapBounds.toBBoxString());
 	return {
 		"service":"wms",
 		"version": "1.3.0",
@@ -193,10 +191,31 @@ function paramsToAdd(e) {
 		"height": map.getSize().y,
 		"i": e.containerPoint.x,
 		"j": e.containerPoint.y,
-		"crs": "EPSG:4326",
-		"bbox": bbox,
+		//"crs": "EPSG:4326",
+		//"bbox": bbox,
 		//"crs": "EPSG:3857"
 		
+	}
+}
+
+function getBboxParams(map) {
+	if(map.options.crs ===  L.CRS.EPSG3857) {
+		var bbox = "";
+		//NE und SE von LatLng in EPSG3857 projizieren
+		var southWest = L.CRS.EPSG3857.project(map.getBounds().getSouthWest());
+		var northEast = L.CRS.EPSG3857.project(map.getBounds().getNorthEast());
+		bbox += southWest.x + "," + southWest.y + "," + northEast.x + "," + northEast.y;
+		return {"crs":"EPSG:3857","bbox":bbox}
+	}
+
+	if(map.options.crs === L.CRS.EPSG4326) {
+		var bbox = "";
+		var mapBounds = map.getBounds();
+		bbox += mapBounds.getSouth() + ",";
+		bbox += mapBounds.getWest() + ",";
+		bbox += mapBounds.getNorth() + ",";
+		bbox += mapBounds.getEast();
+		return {"crs":"EPSG:4326","bbox":bbox}
 	}
 }
 
