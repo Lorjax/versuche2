@@ -5,6 +5,14 @@ function Wms() {
 	this.layers = [];
 }
 
+function setDecimal(string) {
+	if(string.indexOf(",") != -1) {
+		return string.replace(",", ".");
+	} else {
+		return string;
+	}
+}
+
 
 Wms.prototype.initWms = function(response) {
 	try {
@@ -47,10 +55,10 @@ Wms.prototype.initWms = function(response) {
 		layerToAdd.setTitle(layer_title);
 		layerToAdd.setQueryable(layer_queryable);
 		layerToAdd.setLegend(layer_legend);
-		layerToAdd.setWestBound(layer_westBounds);
-		layerToAdd.setEastBound(layer_eastBounds);
-		layerToAdd.setSouthBound(layer_southBounds);
-		layerToAdd.setNorthBound(layer_northBounds);
+		layerToAdd.setWestBound(setDecimal(layer_westBounds));
+		layerToAdd.setEastBound(setDecimal(layer_eastBounds));
+		layerToAdd.setSouthBound(setDecimal(layer_southBounds));
+		layerToAdd.setNorthBound(setDecimal(layer_northBounds));
 
 		this.layers.push(layerToAdd);
 
