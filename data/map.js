@@ -136,34 +136,18 @@ map.on('contextmenu', function(e) {
 	var crsBbox = getBboxParams(map);
 	//Aus WMS-Parametern und GetFeatureInfo-Parametern eins machen
 	text = L.Util.getParamString(L.Util.extend({}, params, crsBbox));
-	//URL des WMS an alle Parameter anhängen und somit URL erzeugen
-	/*
-	text = "Größe Kartenrahmen: <br>";
-	text += "Höhe y=" + map.getSize().y + "<br>";
-	text += "Breite x=" + map.getSize().x + "<br><br>";
-	text += "Aktuelle BBox: <br>";
-	text += "unten links: <br>";
-	text += "Längengrad: " + map.getBounds().getWest() + "<br>";
-	text += "Breitengrad: " + map.getBounds().getSouth() + "<br>";
-	text += "oben rechts: <br>";
-	text += "Längengrad: " + map.getBounds().getEast() + "<br>";
-	text += "Breitengrad: " + map.getBounds().getNorth() + "<br>";
-	text += "---------------<br>";
-	text += "BBox-Leaflet: <br>";
-	text += map.getBounds().toBBoxString() + "<br>";
-	text += "======eigene BBox========<br>";
-	var params = paramsToAdd(e);
-	for(prop in params) {
-		text += prop + " = " + params[prop] + "<br>";
-	}
-	popup.setContent(text).openOn(map);
-	*/
-	
-	console.log("[DEBUG:wms-url] " + text);
+
+
 	var url = wms.getUrl() + text;
-	console.log("[DEBUG:wms-url] " + url);
 	//Message an main.js mit anzufragender URL
-	self.port.emit("getFeatureInfo", url);
+	console.log(params["layers"].length);
+	if(params["layers"].length === 0 || params["query_layers"].length === 0) {
+		console.log("kein Layer selektiert.")
+		popup.setContent("Kein abfragbarer Layer ausgewählt.").openOn(map);
+	} else {
+
+		self.port.emit("getFeatureInfo", url);
+	}
 	//Listener für Antwort auf GetFeatureInfo
 	self.port.on("getFeatureInfo_fertig", function(data) {
 		//onsole.log("[DEBUG-map.js] erhalte antwort: " + data);
@@ -176,9 +160,7 @@ map.on('contextmenu', function(e) {
 function paramsToAdd(e) {
 	var layers = getDisplayedMaps();
 	var query_layers = getQueryableMaps();
-	var i=0;
-	//console.log("[DEBUG]: eigene BBox " + bbox);
-	//console.log("[DEBUG]: leaflet Bbox:" + mapBounds.toBBoxString());
+	
 	return {
 		"service":"wms",
 		"version": "1.3.0",
@@ -191,9 +173,6 @@ function paramsToAdd(e) {
 		"height": map.getSize().y,
 		"i": e.containerPoint.x,
 		"j": e.containerPoint.y,
-		//"crs": "EPSG:4326",
-		//"bbox": bbox,
-		//"crs": "EPSG:3857"
 		
 	}
 }
@@ -236,9 +215,10 @@ function getQueryableMaps() {
 	var result = [];
 	for(i; i<leafletLayers.length;i++) {
 		if(map.hasLayer(leafletLayers[i]) && wms.getLayers()[i].getQueryable() == 1) {
+
 			result.push(wms.getLayers()[i].getName());
 		}
 	}
-	console.log("[DEBUG:getDisplayedMaps] " + result);
+	console.log("[DEBUG:getQueryableMaps] " + result);
 	return result;
 }
