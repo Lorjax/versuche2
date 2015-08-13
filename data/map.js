@@ -1,5 +1,9 @@
-// jQuery
+/*
+ jQuery
+ Regelt Benutzereingaben über GUI.
+*/
 $(document).ready(function() {
+	//OpenStreetMap Grundkarte hinzufügen oder löschen
 	$("#toggleBaseMap_osm").on("click", function() {
 		if(!map.hasLayer(openstreetmap)) {
 			map.addLayer(openstreetmap);
@@ -10,6 +14,7 @@ $(document).ready(function() {
 		}
 	});
 
+	//CartoDB Grundkarte hinzufügen oder löschen
 	$("#toggleBaseMap_cartodb").on("click", function() {
 		if(!map.hasLayer(cartodb)) {
 			map.addLayer(cartodb);
@@ -20,6 +25,7 @@ $(document).ready(function() {
 		}
 	});
 
+	//WMS-Layer aus Dropdown-Menü hinzufügen oder läschen
 	$("#navLayersDropdown").on("click", "li", function() {
 		var auswahl = $(this).val();
 		if(!map.hasLayer(leafletLayers[auswahl])) {
@@ -37,9 +43,6 @@ $(document).ready(function() {
 		}
 		
 	});
-
-
-
 	
 });
 
@@ -47,18 +50,19 @@ $(document).ready(function() {
  Variablen im lokalen Scope erstellen:
  wms, leafletLayers, Grundkarten und die map
 */
+//Enthält aktuellen WMS
 var wms = new Wms();
-
+//enthält Leaflet-spezifische Layer
 var leafletLayers = [];
-
+//OpenStreetMap-Grundkarte
 var openstreetmap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',{
 	attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors | '
 });
-
+//CartoDB Grundkarte
 var cartodb = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{
 	attribution:'Tiles by &copy; <a href="http://cartodb.com/attributions">CartoDB</a> / Data by &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors | '
 });
-
+//Kartenrahmen
 var map = L.map('map',{
 	center: [50,10],
 	zoom: 5,
@@ -68,10 +72,14 @@ var map = L.map('map',{
 });
 
 
+/*
+ Listener für openLeafletTab:
 
+ Initialisiert WMS und die zugehörigen Layer und fügt eine
+ Maßstabsleiste der Karte hinzu.
+*/
 
 self.port.on("openLeafletTab", function(data) {
-	console.log("[DEBUG-map.js] open Tab");
 	//URL in wms schreiben
 	wms.setUrl(self.options.url);
 	//WMS initialisieren
@@ -80,19 +88,31 @@ self.port.on("openLeafletTab", function(data) {
 	loadLayers();
 	//Scale einfügen
 	L.control.scale().addTo(map);
-	
-
+	// "Verbunden mit" setzen
 	$("#navServerName").text(wms.url);
 });
 
 
+
+/*
+ loadLayers()
+
+ Erstellt aus Layer-Objekten Leaflet-spezifische Objekte
+ um diese der Karte hinzufügen zu können.
+*/
 function loadLayers() {
+	//alle Layer aufrufen
 	var wmsLayers = wms.getLayers();
+	//CRS des Kartenrahmens
 	var crs = map.options.crs;
+
 	for(var i = 0; i < wmsLayers.length; i++) {
+		//Eintrag im Dropdown-Menü erzeugen, wenn Layer über Namen verfügt. Falls nicht
+		//ist Layer nur als Kategorie gedacht.
 		if(wmsLayers[i].getName() != "") {
 			$("#navLayersDropdown").append("<li value="+i+"><a href='#'><span></span> " + wmsLayers[i].getTitle() + "</a></li>");
 		}
+		//L.tileLayer.wms erzeugen und in Array leafletLayers speichern.
 		leafletLayers[i] = L.tileLayer.wms(wms.getUrl(), {
 			layers: wmsLayers[i].getName(),
 			format:'image/png',
@@ -106,6 +126,13 @@ function loadLayers() {
 
 }
 
+/*
+ panToLayerCenter()
+
+ Verschiebt den Kartenausschnitt auf den Mittelpunkt der 
+ BBox des gegebenen Layers i
+ i repräsentiert die Reihnfolge im Dropdown-Menü
+*/
 function panToLayerCenter(i) {
 	var layer = wms.getLayers()[i];
 	var layerBounds = L.latLngBounds(L.latLng(layer.getSouthBound(),layer.getWestBound()), L.latLng(layer.getNorthBound(),layer.getEastBound()));
@@ -113,6 +140,14 @@ function panToLayerCenter(i) {
 	map.panTo(layerBounds.getCenter());
 }
 
+
+/*
+ panToLayerBounds()
+
+ Verschiebt den Kartenausschnitt auf die komplette 
+ BBox des gegebenen Layers i
+ i repräsentiert die Reihnfolge im Dropdown-Menü
+*/
 function panToLayerBounds(i) {
 	var layer = wms.getLayers()[i];
 	var layerBounds = L.latLngBounds(L.latLng(layer.getSouthBound(),layer.getWestBound()), L.latLng(layer.getNorthBound(),layer.getEastBound()));
@@ -120,46 +155,49 @@ function panToLayerBounds(i) {
 	map.fitBounds(layerBounds);
 }
 
+
 /*
-Methoden und Listener für GetFeatureInfo
+ Listener für Rechtsklick
+
+ Erzeugt Popup an angeklickter Position, erzeugt WMS-URL für
+ GetFeatureInfo und fragt diese an. Die Antwort wird mithilfe
+ des Listeners getFeatureInfo_fertig empfangen.
 */
 map.on('contextmenu', function(e) {
 	//Popup erstellen und Position setzen
-	console.log(e.latlng.toString());
-	console.log(e.latlng.lat);
-	console.log(e.latlng.lng);
 	var popup = L.popup({autoPan: false, maxHeight: 200, maxWidth:500}).setLatLng(e.latlng);
 	// leeren Text erstellen
 	var text = "";
-	//Zusätzliche GetFeatureInfo-Parameter erzeugen
+	//GetFeatureInfo-Parameter erzeugen
 	var params = paramsToAdd(e);
 	var crsBbox = getBboxParams(map);
-	//Aus WMS-Parametern und GetFeatureInfo-Parametern eins machen
+	//Aus GetFeatureInfo-Parametern und CRS eins machen
 	text = L.Util.getParamString(L.Util.extend({}, params, crsBbox));
-
-
+	//Parameter an WMS-URL anhängen
 	var url = wms.getUrl() + text;
 	//Message an main.js mit anzufragender URL
-	console.log(params["layers"].length);
+	//Wenn aktuelle Ansicht überhaupt keinen Layer enthält:
 	if(params["layers"].length === 0 || params["query_layers"].length === 0) {
-		console.log("kein Layer selektiert.")
 		popup.setContent("Kein abfragbarer Layer ausgewählt.").openOn(map);
 	} else {
-
+		//Kartenrahmen enthält Layer, frage WMS an.
 		self.port.emit("getFeatureInfo", url);
 	}
 	//Listener für Antwort auf GetFeatureInfo
 	self.port.on("getFeatureInfo_fertig", function(data) {
-		//onsole.log("[DEBUG-map.js] erhalte antwort: " + data);
 		//Popup-Content setzen aus Antwort und auf Karte anzeigen
 		popup.setContent(data).openOn(map);
 	});
 });
 
+/*
+ paramsToAdd()
 
+ Erzeugt die der WMS-URL anzuhängenden GetFeatureInfo-Parameter.
+*/
 function paramsToAdd(e) {
-	var layers = getDisplayedMaps();
-	var query_layers = getQueryableMaps();
+	var layers = getDisplayedLayer();
+	var query_layers = getQueryableLayer();
 	
 	return {
 		"service":"wms",
@@ -177,7 +215,15 @@ function paramsToAdd(e) {
 	}
 }
 
+/*
+ getBboxParams()
+
+ Erzeugt korrekte BoundingBox-Parameter und projiziert diese ggf. in
+ EPSG3857 falls Kartenrahmen über diesen verfügt.
+ Gibt BBox und entsprechendes CRS in JSON zurück.
+*/
 function getBboxParams(map) {
+	//Kartenrahmen in EPSG3857
 	if(map.options.crs ===  L.CRS.EPSG3857) {
 		var bbox = "";
 		//NE und SE von LatLng in EPSG3857 projizieren
@@ -187,6 +233,7 @@ function getBboxParams(map) {
 		return {"crs":"EPSG:3857","bbox":bbox}
 	}
 
+	//Kartenrahmen in EPSG4326
 	if(map.options.crs === L.CRS.EPSG4326) {
 		var bbox = "";
 		var mapBounds = map.getBounds();
@@ -198,7 +245,14 @@ function getBboxParams(map) {
 	}
 }
 
-function getDisplayedMaps() {
+/*
+ getDisplayedLayer()
+
+ Ermittelt die derzeit im Kartenrahmen angezeigten Layer.
+ Gibt ein Array der angezeigten Layer zurück, welches
+ ggf. leer sein kann bei keinem angezeigten Layer.
+*/
+function getDisplayedLayer() {
 	var i = 0;
 	var result = [];
 	for(i; i<leafletLayers.length;i++) {
@@ -206,11 +260,17 @@ function getDisplayedMaps() {
 			result.push(wms.getLayers()[i].getName());
 		}
 	}
-	console.log("[DEBUG:getDisplayedMaps] " + result);
 	return result;
 }
 
-function getQueryableMaps() {
+/*
+ getQueryableLayer()
+
+ Ermittelt alle Layer, die aktuell angezeigt und queryable sind.
+ Gibt ein entsprechendes Array zurück, welches ggf. leer sein kann.
+
+*/
+function getQueryableLayer() {
 	var i = 0;
 	var result = [];
 	for(i; i<leafletLayers.length;i++) {
@@ -219,6 +279,5 @@ function getQueryableMaps() {
 			result.push(wms.getLayers()[i].getName());
 		}
 	}
-	console.log("[DEBUG:getQueryableMaps] " + result);
 	return result;
 }

@@ -1,3 +1,10 @@
+/*
+ Layer
+
+ Das Objekt Layer stellt die Repräsentation eines WMS-Layers dar.
+ Ein Konstruktor sowie mehrere Getter und Setter sind vorhanden.
+*/
+
 function Layer() {
 	this._name = "";
 	this._title = "";
