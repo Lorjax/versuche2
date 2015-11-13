@@ -178,7 +178,7 @@ map.on('contextmenu', function(e) {
 	//Message an main.js mit anzufragender URL
 	//Wenn aktuelle Ansicht überhaupt keinen Layer enthält:
 	if(params["layers"].length === 0 || params["query_layers"].length === 0) {
-		popup.setContent("Kein abfragbarer Layer ausgewählt.").openOn(map);
+		popup.setContent("no queryable layers found.").openOn(map);
 	} else {
 		//Kartenrahmen enthält Layer, frage WMS an.
 		self.port.emit("getFeatureInfo", url);

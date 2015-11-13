@@ -2,7 +2,7 @@
   "name": "wmsviewer",
   "title": "WMS-Viewer",
   "id": "jid1-rG2JKHDA7rbnfg",
-  "description": "Erlaubt das Anfragen und Anzeigen von OGC-konformen WMS-Diensten.",
+  "description": "Allows queries and displaying OGC-compliant WMS services.",
   "author": "Maximilian Guntrum",
   "license": "BSD 2-Clause license",
   "version": "0.2.2",
